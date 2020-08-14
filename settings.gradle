@@ -1,0 +1,3 @@
+rootProject.name = "watchfuleye"
+include ':sample'
+include ':library'
