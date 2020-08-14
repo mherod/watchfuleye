@@ -56,7 +56,7 @@ object WatchfulEye {
         activity?.let {
             allCallbacks.filter { it is Activity && it === activity }.forEach(function)
         }
-        allCallbacks.filter { it !is Activity }.forEach(function)
+        allCallbacks.filter { activity == null || it !is Activity }.forEach(function)
     }
 
     object ActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
@@ -99,10 +99,10 @@ object WatchfulEye {
             activities += activity
             if (beforeCount == 0) {
                 if (history.size == 0) {
-                    notifyAll(Callbacks::onActivityFromCold)
-                    notifyAll(Callbacks::onActivityFromColdOrBackground)
+                    notifyAll(Callbacks::onActivityFromCold, activity)
+                    notifyAll(Callbacks::onActivityFromColdOrBackground, activity)
                 } else {
-                    notifyAll(Callbacks::onActivityFromBackground)
+                    notifyAll(Callbacks::onActivityFromBackground, activity)
                 }
             }
         }
@@ -111,7 +111,7 @@ object WatchfulEye {
             activities -= activity
             history += "${activity::class.java}"
             if (activities.size == 0) {
-                notifyAll(Callbacks::onApplicationBackgrounded)
+                notifyAll(Callbacks::onApplicationBackgrounded, activity)
             }
         }
     }
