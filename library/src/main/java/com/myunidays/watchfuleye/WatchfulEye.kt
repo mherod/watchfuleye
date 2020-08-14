@@ -35,7 +35,6 @@ object WatchfulEye {
         if (packageName !in installed) {
             application.registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)
             installed += packageName
-
         }
     }
 
@@ -97,12 +96,13 @@ object WatchfulEye {
         private fun registerActivity(activity: Activity) {
             val beforeCount = activities.size
             activities += activity
-            if (beforeCount == 0) when (history.size) {
-                0 -> {
+            if (beforeCount == 0) {
+                if (history.size == 0) {
                     notifyAll(Callbacks::onActivityFromCold)
                     notifyAll(Callbacks::onActivityFromColdOrBackground)
+                } else {
+                    notifyAll(Callbacks::onActivityFromBackground)
                 }
-                else -> notifyAll(Callbacks::onActivityFromBackground)
             }
         }
 
