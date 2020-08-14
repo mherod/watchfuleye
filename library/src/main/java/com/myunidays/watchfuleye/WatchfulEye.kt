@@ -20,6 +20,7 @@ object WatchfulEye {
 
     @JvmStatic
     fun registerCallbacks(callbacks: Callbacks) {
+        (callbacks as? Context)?.let(::install)
         allCallbacks += callbacks
     }
 
