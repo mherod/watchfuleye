@@ -108,10 +108,12 @@ object WatchfulEye {
         }
 
         private fun removeActivity(activity: Activity) {
-            activities -= activity
-            history += "${activity::class.java}"
-            if (activities.size == 0) {
-                notifyAll(Callbacks::onApplicationBackgrounded, activity)
+            if (activities.size > 0) {
+                activities -= activity
+                history += "${activity::class.java}"
+                if (activities.size == 0) {
+                    notifyAll(Callbacks::onApplicationBackgrounded, activity)
+                }
             }
         }
     }
