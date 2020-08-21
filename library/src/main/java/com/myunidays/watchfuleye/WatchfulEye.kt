@@ -3,9 +3,32 @@ package com.myunidays.watchfuleye
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import dagger.Module
+import dagger.Provides
+import dagger.multibindings.IntoSet
 
+@Module
 object WatchfulEye {
+
+    private val activities = mutableSetOf<Activity>()
+
+    @[Provides IntoSet]
+    fun getActivities(): MutableSet<Activity> = activities
+
+    @Provides
+    fun nullableActivity(): Activity? = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 -> {
+            activities.lastOrNull { !it.isDestroyed && !it.isFinishing }
+        }
+        else -> {
+            activities.lastOrNull { !it.isFinishing }
+        }
+    } ?: activities.lastOrNull { it.hasWindowFocus() }
+
+    @Provides
+    fun requireActivity(): Activity = nullableActivity() ?: activities.last()
 
     interface Callbacks {
         fun onActivityFromCold()
@@ -63,8 +86,6 @@ object WatchfulEye {
 
         private val history = mutableSetOf<String>()
 
-        private val activities = mutableSetOf<Activity>()
-
         override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
             registerActivity(activity)
         }
@@ -95,6 +116,7 @@ object WatchfulEye {
         }
 
         private fun registerActivity(activity: Activity) {
+            val activities = getActivities()
             val beforeCount = activities.size
             activities += activity
             if (beforeCount == 0) {
@@ -108,6 +130,7 @@ object WatchfulEye {
         }
 
         private fun removeActivity(activity: Activity) {
+            val activities = getActivities()
             if (activities.size > 0) {
                 activities -= activity
                 history += "${activity::class.java}"
