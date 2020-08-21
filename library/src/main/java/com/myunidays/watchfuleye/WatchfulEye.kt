@@ -18,17 +18,14 @@ object WatchfulEye {
     fun getActivities(): MutableSet<Activity> = activities
 
     @Provides
-    fun nullableActivity(): Activity? = when {
+    fun maybeActiveActivity(): Activity? = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 -> {
-            activities.lastOrNull { !it.isDestroyed && !it.isFinishing }
+            activities.filter { !it.isDestroyed && !it.isFinishing }
         }
         else -> {
-            activities.lastOrNull { !it.isFinishing }
+            activities.filter { !it.isFinishing }
         }
-    } ?: activities.lastOrNull { it.hasWindowFocus() }
-
-    @Provides
-    fun requireActivity(): Activity = nullableActivity() ?: activities.last()
+    }.lastOrNull { it.hasWindowFocus() }
 
     interface Callbacks {
         fun onActivityFromCold()
